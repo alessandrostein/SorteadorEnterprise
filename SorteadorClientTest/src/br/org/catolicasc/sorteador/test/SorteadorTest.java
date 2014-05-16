@@ -21,9 +21,12 @@ public class SorteadorTest {
     /**
      * @param args the command line arguments
      */
-    private static final String JNDI_NAME
+    private static final String JNDI_NAME_SORTEADOR
             = "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/SorteadorBean";
-                
+
+    private static final String JNDI_NAME_USER = 
+            "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/UserFacade";
+    
     public static void main(String[] args) {
 
         InitialContext ctx;
@@ -46,7 +49,7 @@ public class SorteadorTest {
             props.setProperty("org.omg.CORBA.ORBInitialPort", "3700");
 
             ctx = new InitialContext(props);
-            SorteadorBeanRemote sorteadorBean = (SorteadorBeanRemote) ctx.lookup(JNDI_NAME);
+            SorteadorBeanRemote sorteadorBean = (SorteadorBeanRemote) ctx.lookup(JNDI_NAME_SORTEADOR);
             System.out.println(sorteadorBean.sortear());
         } catch (NamingException ex) {
             Logger.getLogger(SorteadorTest.class.getName()).log(Level.SEVERE, null, ex);
