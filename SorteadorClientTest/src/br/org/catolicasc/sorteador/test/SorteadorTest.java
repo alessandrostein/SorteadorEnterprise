@@ -5,7 +5,10 @@
  */
 package br.org.catolicasc.sorteador.test;
 
+import br.org.catolicasc.sorteador.entity.User;
 import br.org.catolicasc.sorteador.interfaces.SorteadorBeanRemote;
+import br.org.catolicasc.sorteador.interfaces.UserFacadeRemote;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +54,13 @@ public class SorteadorTest {
             ctx = new InitialContext(props);
             SorteadorBeanRemote sorteadorBean = (SorteadorBeanRemote) ctx.lookup(JNDI_NAME_SORTEADOR);
             System.out.println(sorteadorBean.sortear());
+            
+            UserFacadeRemote userFacade = (UserFacadeRemote) ctx.lookup(JNDI_NAME_USER);
+            
+            List<User> listUser = userFacade.findAll();
+            listUser.forEach(s -> System.out.println(s));
+            
+            
         } catch (NamingException ex) {
             Logger.getLogger(SorteadorTest.class.getName()).log(Level.SEVERE, null, ex);
         }
