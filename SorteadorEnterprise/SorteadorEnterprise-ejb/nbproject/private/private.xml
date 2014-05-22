@@ -5,6 +5,7 @@
         <group>
             <file>file:/home/alessandro/gitrepo/SorteadorEnterprise/SorteadorEnterprise/SorteadorEnterprise-ejb/src/java/br/org/catolicasc/sorteador/dao/SorteadorBean.java</file>
             <file>file:/home/alessandro/gitrepo/SorteadorEnterprise/SorteadorEnterprise/SorteadorEnterprise-ejb/src/java/br/org/catolicasc/sorteador/dao/UserFacade.java</file>
+            <file>file:/home/alessandro/gitrepo/SorteadorEnterprise/SorteadorEnterprise/SorteadorEnterprise-ejb/src/java/br/org/catolicasc/sorteador/dao/RoleFacade.java</file>
             <file>file:/home/alessandro/gitrepo/SorteadorEnterprise/SorteadorEnterprise/SorteadorEnterprise-ejb/src/java/br/org/catolicasc/sorteador/dao/AbstractFacade.java</file>
             <file>file:/home/alessandro/gitrepo/SorteadorEnterprise/SorteadorEnterprise/SorteadorEnterprise-ejb/src/conf/persistence.xml</file>
         </group>

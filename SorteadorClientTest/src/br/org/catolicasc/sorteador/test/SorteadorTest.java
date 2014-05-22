@@ -5,7 +5,9 @@
  */
 package br.org.catolicasc.sorteador.test;
 
+import br.org.catolicasc.sorteador.entity.Role;
 import br.org.catolicasc.sorteador.entity.User;
+import br.org.catolicasc.sorteador.interfaces.RoleFacadeRemote;
 import br.org.catolicasc.sorteador.interfaces.SorteadorBeanRemote;
 import br.org.catolicasc.sorteador.interfaces.UserFacadeRemote;
 import java.util.List;
@@ -27,9 +29,16 @@ public class SorteadorTest {
     private static final String JNDI_NAME_SORTEADOR
             = "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/SorteadorBean";
 
-    private static final String JNDI_NAME_USER = 
-            "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/UserFacade";
-    
+    private static final String JNDI_NAME_USER
+            = "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/UserFacade";
+
+    private static final String JNDI_NAME_ROLE
+            = "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/RoleFacade";
+
+    static UserFacadeRemote userFacade;
+    static RoleFacadeRemote roleFacade;
+    static SorteadorBeanRemote sorteadorBean;
+
     public static void main(String[] args) {
 
         InitialContext ctx;
@@ -51,21 +60,72 @@ public class SorteadorTest {
             // optional.  Defaults to 3700.  Only needed if target orb port is not 3700.
             props.setProperty("org.omg.CORBA.ORBInitialPort", "3700");
 
+            // variaveis
+            List<User> listUser;
+            List<Role> listRole;
+
+            // conexoes
             ctx = new InitialContext(props);
-            SorteadorBeanRemote sorteadorBean = (SorteadorBeanRemote) ctx.lookup(JNDI_NAME_SORTEADOR);
-            System.out.println(sorteadorBean.sortear());
+            sorteadorBean = (SorteadorBeanRemote) ctx.lookup(JNDI_NAME_SORTEADOR);
+            userFacade = (UserFacadeRemote) ctx.lookup(JNDI_NAME_USER);
+            roleFacade = (RoleFacadeRemote) ctx.lookup(JNDI_NAME_ROLE);
+
+            addTitle("Removendo todos usuarios ....", true);
+            listUser = userFacade.findAll();
+            listUser.forEach(s -> userFacade.remove(s));
+
+            addTitle("Removendo todas regras ....", true);
+            listRole = roleFacade.findAll();
+            listRole.forEach(s -> roleFacade.remove(s));
+
+            addTitle("Sorteando numero ...", true);
+            Integer numberSorteado = sorteadorBean.sortear();
+            addTitle("Numero sorteado: " + numberSorteado, true);
+
+            addTitle("Criando novo usuario...", true);
+            User user = new User();
+            user.setName("Alessandro " + sorteadorBean.sortear());
+            userFacade.create(user);
+
+            addTitle("Carregando usuarios", true);
+            listUser = userFacade.findAll();
+            listUser.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
+
+            addTitle("Criando nova regra...", true);
+            Role role = new Role();
+            role.setName("Regra " + numberSorteado);
+            roleFacade.create(role);
+
+            addTitle("Carregando regras...", true);
+            listRole = roleFacade.findAll();
+            listRole.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
+
+            addTitle("Total de usuarios: " + userFacade.count(), true);
+            addTitle("Total de regras: " + roleFacade.count(), false);
             
-            UserFacadeRemote userFacade = (UserFacadeRemote) ctx.lookup(JNDI_NAME_USER);
+            addTitle("Alterando usuario  " + user.getName(), true);
+            listUser = userFacade.findAll();
+            for (User u: listUser) {
+                u.setName("Este usuario foi alterado >> " + u.getName());
+                userFacade.edit(u);
+            }
             
-            List<User> listUser = userFacade.findAll();
-            listUser.forEach(s -> System.out.println(s));
+            addTitle("Listando usuario alterado...", true);
+            listUser = userFacade.findAll();
+            listUser.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
+
             
-            
+
         } catch (NamingException ex) {
             Logger.getLogger(SorteadorTest.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
+
+    public static void addTitle(String title, boolean pularLinha) {
+        if (pularLinha) {
+            System.out.println("");
+        }
+        System.out.println(title);
+    }
 }
-
-
