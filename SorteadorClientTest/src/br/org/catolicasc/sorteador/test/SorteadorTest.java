@@ -78,81 +78,52 @@ public class SorteadorTest {
             roleFacade = (RoleFacadeRemote) ctx.lookup(JNDI_NAME_ROLE);
             userroleFacade = (UserRoleFacadeRemote) ctx.lookup(JNDI_NAME_USER_ROLE);
 
-            addTitle("Removendo todos usuarios ....", true);
-            listUser = userFacade.findAll();
-            listUser.forEach(s -> userFacade.remove(s));
+            addTitle("Removendo todos usuarios", true);
+            removeAllUser();
 
-            addTitle("Removendo todas regras ....", true);
-            listRole = roleFacade.findAll();
-            listRole.forEach(s -> roleFacade.remove(s));
+            addTitle("Removendo todas regras", true);
+            removeAllRole();
 
-            addTitle("Removendo todas regras dos usuarios....", true);
-            listUserRole = userroleFacade.findAll();
-            listUserRole.forEach(s -> userroleFacade.remove(s));
+            addTitle("Removendo todos relacionamentos", true);
+            removeAllUserRole();
 
             addTitle("Sorteando numero ...", true);
             Integer numberSorteado = sorteadorBean.sortear();
             addTitle("Numero sorteado: " + numberSorteado, true);
 
-            addTitle("Criando novo usuario...", true);
-            User user = new User();
-            user.setName("Alessandro " + sorteadorBean.sortear());
-            userFacade.create(user);
+            addTitle("Novo usuario.", true);
+            userFacade.create(newUser("Alessandro " + numberSorteado));
 
-            addTitle("Carregando usuarios", true);
-            listUser = userFacade.findAll();
-            listUser.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
+            listAllUser();
 
-            addTitle("Criando nova regra...", true);
-            Role role = new Role();
-            role.setName("Regra " + numberSorteado);
-            roleFacade.create(role);
+            addTitle("Nova regra", true);
+            roleFacade.create(newRole("Regra " + numberSorteado));
 
-            addTitle("Carregando regras...", true);
-            listRole = roleFacade.findAll();
-            listRole.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
+            listAllRole();
 
             addTitle("Criando nova regra para os usuarios...", true);
             listRole = roleFacade.findAll();
             for (Role r : listRole) {
                 listUser = userFacade.findAll();
                 for (User u : listUser) {
-                    UserRole userrole = new UserRole();
-                    userrole.setUserid(u.getId());
-                    userrole.setRoleid(r.getId());
-                    userroleFacade.create(userrole);
+                    userroleFacade.create(newUserRole(u, r));
                 }
             }
-            
-            addTitle("Carregando regras dos usuarios...", true);
-            listUserRole = userroleFacade.findAll();
-            listUserRole.forEach(s -> System.out.println("ID: " + s.getId() + " USERID: " + s.getUserid() + " ROLEID: " + s.getRoleid()));
+
+            listAllUserRole();
 
             addTitle("Total de usuarios: " + userFacade.count(), true);
             addTitle("Total de regras: " + roleFacade.count(), false);
-            addTitle("Total de regras para usuarios: " + userroleFacade.count(), false);
+            addTitle("Total de relacionamentos: " + userroleFacade.count(), false);
 
-            addTitle("Alterando usuario  " + user.getName(), true);
-            listUser = userFacade.findAll();
-            for (User u : listUser) {
-                u.setName("Este usuario foi alterado >> " + u.getName());
-                userFacade.edit(u);
-            }
+            addTitle("Alterações: ", true);
+            editAllUser("Fabio Dippold");
+            editAllRole("Regra Tester");
 
-            addTitle("Listando usuario alterado...", true);
-            listUser = userFacade.findAll();
-            listUser.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
-
-            addTitle("Alterando regra  " + role.getName(), true);
-            listRole = roleFacade.findAll();
-            for (Role r : listRole) {
-                r.setName("Esta regra foi alterado >> " + r.getName());
-                roleFacade.edit(r);
-            }
-
-            addTitle("Listando regras alterada...", true);
-            listRole = roleFacade.findAll();
-            listRole.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
+            addTitle("Usuario:", false);
+            listAllUser();
+            addTitle("Regra:", false);
+            listAllRole();
 
         } catch (NamingException ex) {
             Logger.getLogger(SorteadorTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -165,5 +136,87 @@ public class SorteadorTest {
             System.out.println("");
         }
         System.out.println(title);
+    }
+
+    public static User newUser(String name) {
+        User u = new User();
+        u.setName(name);
+        return u;
+    }
+
+    public static Role newRole(String name) {
+        Role r = new Role();
+        r.setName(name);
+        return r;
+    }
+
+    public static UserRole newUserRole(User user, Role role) {
+        UserRole ur = new UserRole();
+        ur.setUserid(user.getId());
+        ur.setRoleid(role.getId());
+        return ur;
+    }
+
+    public static void removeAllUser() {
+        List<User> listUser;
+        listUser = userFacade.findAll();
+
+        listUser.stream().forEach((u) -> {
+            userFacade.remove(u);
+        });
+    }
+
+    public static void removeAllRole() {
+        List<Role> listRole;
+        listRole = roleFacade.findAll();
+
+        listRole.stream().forEach((u) -> {
+            roleFacade.remove(u);
+        });
+    }
+
+    public static void removeAllUserRole() {
+        List<UserRole> listUserRole;
+        listUserRole = userroleFacade.findAll();
+
+        listUserRole.stream().forEach((u) -> {
+            userroleFacade.remove(u);
+        });
+    }
+
+    public static void listAllUser() {
+        List<User> listUser;
+        listUser = userFacade.findAll();
+        listUser.forEach(s -> System.out.println("ID: " + s.getId() + " NAME: " + s.getName()));
+    }
+
+    public static void listAllRole() {
+        List<Role> listRole;
+        listRole = roleFacade.findAll();
+        listRole.forEach(s -> System.out.println("ID: " + s.getId() + " NAME: " + s.getName()));
+    }
+
+    public static void listAllUserRole() {
+        List<UserRole> listUserRole;
+        listUserRole = userroleFacade.findAll();
+        listUserRole.forEach(s -> System.out.println("ID: " + s.getId() + " IDUSER: " + s.getUserid() + " IDROLE: " + s.getRoleid()));
+    }
+
+    public static void editAllUser(String name) {
+        List<User> listUser;
+        listUser = userFacade.findAll();
+        listUser.stream().forEach((u) -> {
+            u.setName(name);
+            userFacade.edit(u);
+        });
+    }
+
+    public static void editAllRole(String name) {
+        List<Role> listRole;
+        listRole = roleFacade.findAll();
+        listRole.stream().forEach((u) -> {
+            u.setName(name);
+            roleFacade.edit(u);
+        });
     }
 }
