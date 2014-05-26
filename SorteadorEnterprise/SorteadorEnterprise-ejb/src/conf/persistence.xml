@@ -4,6 +4,7 @@
     <jta-data-source>SorteadorEnterprise-ejbPU</jta-data-source>
     <class>br.org.catolicasc.sorteador.entity.User</class>
     <class>br.org.catolicasc.sorteador.entity.Role</class>
+    <class>br.org.catolicasc.sorteador.entity.UserRole</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <validation-mode>NONE</validation-mode>
     <properties>

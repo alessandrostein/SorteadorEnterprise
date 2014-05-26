@@ -7,9 +7,11 @@ package br.org.catolicasc.sorteador.test;
 
 import br.org.catolicasc.sorteador.entity.Role;
 import br.org.catolicasc.sorteador.entity.User;
+import br.org.catolicasc.sorteador.entity.UserRole;
 import br.org.catolicasc.sorteador.interfaces.RoleFacadeRemote;
 import br.org.catolicasc.sorteador.interfaces.SorteadorBeanRemote;
 import br.org.catolicasc.sorteador.interfaces.UserFacadeRemote;
+import br.org.catolicasc.sorteador.interfaces.UserRoleFacadeRemote;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -35,8 +37,12 @@ public class SorteadorTest {
     private static final String JNDI_NAME_ROLE
             = "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/RoleFacade";
 
+    private static final String JNDI_NAME_USER_ROLE
+            = "java:global/SorteadorEnterprise/SorteadorEnterprise-ejb/UserRoleFacade";
+
     static UserFacadeRemote userFacade;
     static RoleFacadeRemote roleFacade;
+    static UserRoleFacadeRemote userroleFacade;
     static SorteadorBeanRemote sorteadorBean;
 
     public static void main(String[] args) {
@@ -63,12 +69,14 @@ public class SorteadorTest {
             // variaveis
             List<User> listUser;
             List<Role> listRole;
+            List<UserRole> listUserRole;
 
             // conexoes
             ctx = new InitialContext(props);
             sorteadorBean = (SorteadorBeanRemote) ctx.lookup(JNDI_NAME_SORTEADOR);
             userFacade = (UserFacadeRemote) ctx.lookup(JNDI_NAME_USER);
             roleFacade = (RoleFacadeRemote) ctx.lookup(JNDI_NAME_ROLE);
+            userroleFacade = (UserRoleFacadeRemote) ctx.lookup(JNDI_NAME_USER_ROLE);
 
             addTitle("Removendo todos usuarios ....", true);
             listUser = userFacade.findAll();
@@ -77,6 +85,10 @@ public class SorteadorTest {
             addTitle("Removendo todas regras ....", true);
             listRole = roleFacade.findAll();
             listRole.forEach(s -> roleFacade.remove(s));
+
+            addTitle("Removendo todas regras dos usuarios....", true);
+            listUserRole = userroleFacade.findAll();
+            listUserRole.forEach(s -> userroleFacade.remove(s));
 
             addTitle("Sorteando numero ...", true);
             Integer numberSorteado = sorteadorBean.sortear();
@@ -100,21 +112,47 @@ public class SorteadorTest {
             listRole = roleFacade.findAll();
             listRole.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
 
+            addTitle("Criando nova regra para os usuarios...", true);
+            listRole = roleFacade.findAll();
+            for (Role r : listRole) {
+                listUser = userFacade.findAll();
+                for (User u : listUser) {
+                    UserRole userrole = new UserRole();
+                    userrole.setUserid(u.getId());
+                    userrole.setRoleid(r.getId());
+                    userroleFacade.create(userrole);
+                }
+            }
+            
+            addTitle("Carregando regras dos usuarios...", true);
+            listUserRole = userroleFacade.findAll();
+            listUserRole.forEach(s -> System.out.println("ID: " + s.getId() + " USERID: " + s.getUserid() + " ROLEID: " + s.getRoleid()));
+
             addTitle("Total de usuarios: " + userFacade.count(), true);
             addTitle("Total de regras: " + roleFacade.count(), false);
-            
+            addTitle("Total de regras para usuarios: " + userroleFacade.count(), false);
+
             addTitle("Alterando usuario  " + user.getName(), true);
             listUser = userFacade.findAll();
-            for (User u: listUser) {
+            for (User u : listUser) {
                 u.setName("Este usuario foi alterado >> " + u.getName());
                 userFacade.edit(u);
             }
-            
+
             addTitle("Listando usuario alterado...", true);
             listUser = userFacade.findAll();
             listUser.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
 
-            
+            addTitle("Alterando regra  " + role.getName(), true);
+            listRole = roleFacade.findAll();
+            for (Role r : listRole) {
+                r.setName("Esta regra foi alterado >> " + r.getName());
+                roleFacade.edit(r);
+            }
+
+            addTitle("Listando regras alterada...", true);
+            listRole = roleFacade.findAll();
+            listRole.forEach(s -> System.out.println(s.getId() + " - " + s.getName()));
 
         } catch (NamingException ex) {
             Logger.getLogger(SorteadorTest.class.getName()).log(Level.SEVERE, null, ex);
